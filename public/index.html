@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多级闪卡学习应用</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="card-container">
+        
+        <div class="controls">
+            <label for="mode-select">选择模式：</label>
+            <select id="mode-select">
+                <option value="study">学习模式（顺序）</option>
+                <option value="test">测试模式（乱序）</option>
+            </select>
+            
+            <label for="difficulty-select">选择难度：</label>
+            <select id="difficulty-select">
+                <option value="1">难度 1</option>
+                <option value="2">难度 2</option>
+                <option value="3">难度 3</option>
+                <option value="4">难度 4</option>
+                <option value="5">难度 5</option>
+                <option value="6">难度 6</option>
+                <option value="7">难度 7</option>
+            </select>
+        </div>
+        
+        <img id="flashcard-image" src="" alt="学习闪卡" class="flashcard-img">
+        
+        <p id="card-status">卡片进度: 0 / 0</p>
+        <button id="next-button">下一张 &raquo;</button>
+    </div>
+
+    <audio id="flashcard-audio" src=""></audio>
+
+    <script src="script.js"></script>
+</body>
+</html>

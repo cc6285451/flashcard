@@ -1,0 +1,78 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: #f4f4f9;
+}
+
+.card-container {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 90%;
+    width: 500px; /* 限制容器最大宽度 */
+}
+
+/* 模式和难度控制区域的样式 */
+.controls {
+    margin-bottom: 20px;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    /* 使用 Flexbox 使控件并排 */
+    display: flex;
+    justify-content: space-around; /* 均匀分配空间 */
+    align-items: center;
+    flex-wrap: wrap; /* 确保在小屏幕上可以换行 */
+}
+
+/* 确保 select 控件有间距 */
+#mode-select, #difficulty-select {
+    padding: 8px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin: 5px; /* 添加外边距，使它们之间有间隔 */
+}
+
+#card-status {
+    margin: 10px 0;
+    font-size: 1.1em;
+    color: #555;
+}
+
+.flashcard-img {
+    width: 100%;
+    max-width: 400px; /* 限制图片最大宽度 */
+    height: auto;
+    aspect-ratio: 4/3; /* 保持一个合理的图片比例 */
+    object-fit: contain; /* 确保图片内容完整显示 */
+    border-radius: 8px;
+    margin-bottom: 20px;
+    cursor: pointer; /* 鼠标悬停时显示可点击 */
+    border: 3px solid #007bff;
+    transition: transform 0.2s;
+}
+
+.flashcard-img:hover {
+    transform: scale(1.02); /* 悬停时略微放大 */
+}
+
+#next-button {
+    padding: 10px 20px;
+    font-size: 18px;
+    color: white;
+    background-color: #28a745;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#next-button:hover {
+    background-color: #218838;
+}
