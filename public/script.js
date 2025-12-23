@@ -12,6 +12,7 @@ const DIFFICULTY_CARD_COUNTS = {
 
 
 
+const GROUP_SIZE = 20; // 每组多少张卡片
 
 // --- 元素引用 ---
 const difficultySelect = document.getElementById('difficulty-select');
@@ -20,45 +21,74 @@ const imageElement = document.getElementById('flashcard-image');
 const audioElement = document.getElementById('flashcard-audio');
 const nextButton = document.getElementById('next-button');
 const cardStatusElement = document.getElementById('card-status');
+const groupContainer = document.getElementById('group-buttons-container');
 
 // --- 状态变量 ---
 let currentDifficulty = "1"; 
 let currentMode = "study";      
 let cardList = [];           
 let currentCardIndexInList = 0; 
-
-// --- 辅助函数 ---
+let currentGroupIndex = 0; // 当前第几组 (0代表第1组)
 
 /**
- * 将数字格式化为三位字符串 (001, 002, ...)
- * @param {number} num
- * @returns {string}
+ * 格式化数字为三位字符串
  */
 function formatCardNumber(num) {
     return String(num).padStart(3, '0');
 }
 
 /**
- * 切换模式或难度时，生成新的卡片列表并重置进度
+ * 动态渲染左侧分组按钮
  */
-function loadCards() {
+function renderGroupButtons() {
+    groupContainer.innerHTML = '';
+    const totalCards = DIFFICULTY_CARD_COUNTS[currentDifficulty];
+    const numGroups = Math.ceil(totalCards / GROUP_SIZE);
+
+    for (let i = 0; i < numGroups; i++) {
+        const start = i * GROUP_SIZE + 1;
+        const end = Math.min((i + 1) * GROUP_SIZE, totalCards);
+        
+        const btn = document.createElement('button');
+        btn.className = `group-btn ${i === currentGroupIndex ? 'active' : ''}`;
+        btn.textContent = `组 ${i + 1} (${start}-${end})`;
+        
+        btn.onclick = () => {
+            currentGroupIndex = i;
+            loadCards(false); // 切换组时不重置难度
+        };
+        groupContainer.appendChild(btn);
+    }
+}
+
+/**
+ * 加载卡片逻辑
+ * @param {boolean} resetToFirstGroup 是否重置到第一组
+ */
+function loadCards(resetToFirstGroup = true) {
     currentDifficulty = difficultySelect.value;
     currentMode = modeSelect.value;
     
-    const count = DIFFICULTY_CARD_COUNTS[currentDifficulty];
-    if (!count) {
-        console.error("未找到该难度级别的卡片数量配置！");
-        alert("配置错误：请检查 script.js 中的卡片数量设置。");
-        return;
+    if (resetToFirstGroup) {
+        currentGroupIndex = 0;
     }
 
-    cardList = Array.from({ length: count }, (_, i) => i + 1);
+    // 更新侧边栏状态
+    renderGroupButtons();
+
+    const totalInDifficulty = DIFFICULTY_CARD_COUNTS[currentDifficulty];
+    const startNum = currentGroupIndex * GROUP_SIZE + 1;
+    const endNum = Math.min((currentGroupIndex + 1) * GROUP_SIZE, totalInDifficulty);
+
+    // 生成当前组的数字列表
+    cardList = [];
+    for (let i = startNum; i <= endNum; i++) {
+        cardList.push(i);
+    }
     
+    // 如果是测试模式，打乱该组内的顺序
     if (currentMode === 'test') {
         cardList.sort(() => Math.random() - 0.5); 
-        console.log(`已加载难度 ${currentDifficulty}，模式：乱序测试`);
-    } else {
-        console.log(`已加载难度 ${currentDifficulty}，模式：顺序学习`);
     }
     
     currentCardIndexInList = 0;
@@ -66,104 +96,77 @@ function loadCards() {
 }
 
 /**
- * 播放当前音频，处理自动播放被阻止的兼容性问题
+ * 播放声音（带浏览器兼容处理）
  */
 function playAudio() {
-    // 1. 确保音频停止并重置时间
     audioElement.pause();
     audioElement.currentTime = 0; 
-
-    // 2. 尝试播放，并捕获自动播放错误
-    audioElement.play().catch(error => {
-        // 只有在浏览器明确阻止自动播放时才提示
-        if (error.name === "NotAllowedError" || error.name === "AbortError") {
-             console.warn("浏览器阻止了音频自动播放。请点击图片或'下一张'按钮来启动播放授权。");
-             // 可以在此处给用户一个更明显的提示，但通常不建议频繁使用 alert
-        } else {
-             console.error("音频播放失败:", error);
-        }
+    audioElement.play().catch(e => {
+        console.warn("自动播放被拦截，请点击图片或按钮交互。");
     });
 }
 
 /**
- * 更新卡片显示（图片、音频源和进度状态），并在学习模式下自动播放
+ * 更新界面显示
  */
 function updateCardDisplay() {
-    if (cardList.length === 0) {
-        imageElement.src = '';
-        cardStatusElement.textContent = `卡片进度: 0 / 0`;
-        return;
-    }
+    if (cardList.length === 0) return;
     
-    const rawCardNumber = cardList[currentCardIndexInList];
-    const cardNumber = formatCardNumber(rawCardNumber); 
+    const cardNumber = formatCardNumber(cardList[currentCardIndexInList]); 
 
-    // 构建文件路径
+    // 设置路径
     imageElement.src = `./images/${currentDifficulty}/${cardNumber}.jpg`;
-    
-    // **关键修改点：先设置音频源，再尝试播放**
     audioElement.src = `./audio/${currentDifficulty}/${cardNumber}.mp3`;
     
+    // 状态文字
+    const groupStart = currentGroupIndex * GROUP_SIZE + 1;
+    const groupEnd = Math.min((currentGroupIndex + 1) * GROUP_SIZE, DIFFICULTY_CARD_COUNTS[currentDifficulty]);
+    
     cardStatusElement.textContent = 
-        `模式: ${currentMode === 'study' ? '学习' : '测试'} | 难度 ${currentDifficulty} | 卡片进度: ${currentCardIndexInList + 1} / ${cardList.length}`;
+        `当前：难度 ${currentDifficulty} | 第 ${currentGroupIndex + 1} 组 (${groupStart}-${groupEnd}) | 进度：${currentCardIndexInList + 1} / ${cardList.length}`;
         
-    // ----------------------------------------------------
-    // *** 学习模式自动播放音频 ***
+    // 学习模式自动播放
     if (currentMode === 'study') {
-        // 在新音频源加载完成后，尝试播放。
-        // 使用 load() 和 oncanplaythrough 可以提高成功率，但 for 纯静态网站，直接调用 playAudio() 是更常见的做法。
-        // 这里依赖浏览器的预加载。
         playAudio();
     }
-    // ----------------------------------------------------
 }
 
-
 /**
- * 切换到下一张卡片
+ * 下一张
  */
 function goToNextCard() {
-    // 如果是第一次加载（即 currentCardIndexInList 为 0）且是学习模式，
-    // 某些浏览器可能需要用户在加载前进行一次点击，所以我们在 goToNextCard 中调用 updateCardDisplay。
-
     currentCardIndexInList++;
     
-    // 检查是否到达列表末尾
     if (currentCardIndexInList >= cardList.length) {
         currentCardIndexInList = 0;
-        
-        if (currentMode === 'test') {
-             loadCards(); 
-             alert(`恭喜您完成了本轮测试！将重新打乱顺序开始新一轮测试。`);
-             return;
-        } else {
-             // 在学习模式下，重新加载确保顺序仍是 1, 2, 3...
-             loadCards();
-             alert(`恭喜您完成了难度 ${currentDifficulty} 的所有 ${cardList.length} 张卡片！将重新开始顺序学习。`);
-             return;
-        }
+        alert(`本组 (${currentGroupIndex + 1}) 已完成！将重新开始。`);
+        // 这里可以设计成自动跳到下一组，但为了稳妥，先循环本组
     }
     updateCardDisplay();
 }
 
+// --- 事件监听 ---
 
-// --- 事件监听器 ---
+// 切换难度：需要重置分组
+difficultySelect.addEventListener('change', () => loadCards(true));
 
-// 1. 模式选择器变更事件 
-modeSelect.addEventListener('change', loadCards);
+// 切换模式：保持当前分组
+modeSelect.addEventListener('change', () => loadCards(false));
 
-// 2. 难度选择器变更事件
-difficultySelect.addEventListener('change', loadCards);
-
-// 3. 点击图片播放音频 (在任何模式下都作为手动重播/首次播放授权)
+// 点击图片重播声音
 imageElement.addEventListener('click', playAudio);
 
-// 4. 点击按钮切换下一张
+// 下一张按钮
 nextButton.addEventListener('click', goToNextCard);
 
-// 5. 页面初始化
+// 键盘快捷键：空格或回车切换下一张
+document.addEventListener('keydown', (e) => {
+    if (e.code === 'Space' || e.code === 'Enter') {
+        goToNextCard();
+    }
+});
+
+// 初始化
 document.addEventListener('DOMContentLoaded', () => {
-    modeSelect.value = currentMode;
-    difficultySelect.value = currentDifficulty; 
-    loadCards();
+    loadCards(true);
 });

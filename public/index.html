@@ -3,40 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>多级闪卡学习应用</title>
+    <title>闪卡学习系统 - 极速版</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="main-container">
+        <aside class="sidebar">
+            <h2>卡片分组</h2>
+            <div id="group-buttons-container">
+                </div>
+        </aside>
 
-    <div class="card-container">
-        
-        <div class="controls">
-            <label for="mode-select">选择模式：</label>
-            <select id="mode-select">
-                <option value="study">学习模式（顺序）</option>
-                <option value="test">测试模式（乱序）</option>
-            </select>
-            
-            <label for="difficulty-select">选择难度：</label>
-            <select id="difficulty-select">
-                <option value="1">难度 1</option>
-                <option value="2">难度 2</option>
-                <option value="3">难度 3</option>
-                <option value="4">难度 4</option>
-                <option value="5">难度 5</option>
-                <option value="6">难度 6</option>
-                <option value="7">难度 7</option>
-            </select>
-        </div>
-        
-        <img id="flashcard-image" src="" alt="学习闪卡" class="flashcard-img">
-        
-        <p id="card-status">卡片进度: 0 / 0</p>
-        <button id="next-button">下一张 &raquo;</button>
+        <main class="content">
+            <div class="controls">
+                <div class="select-group">
+                    <label>难度：</label>
+                    <select id="difficulty-select">
+                        <option value="1">难度 1</option>
+                        <option value="2">难度 2</option>
+                        <option value="3">难度 3</option>
+                        <option value="4">难度 4</option>
+                        <option value="5">难度 5</option>
+                        <option value="6">难度 6</option>
+                        <option value="7">难度 7</option>
+                    </select>
+                </div>
+
+                <div class="select-group">
+                    <label>模式：</label>
+                    <select id="mode-select">
+                        <option value="study">顺序学习 (自动播放)</option>
+                        <option value="test">乱序测试 (手动播放)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="card-display">
+                <div class="image-container">
+                    <img id="flashcard-image" src="" alt="点击图片播放声音">
+                </div>
+                <audio id="flashcard-audio"></audio>
+                <button id="next-button">下一张</button>
+                <div id="card-status"></div>
+            </div>
+        </main>
     </div>
-
-    <audio id="flashcard-audio" src=""></audio>
-
     <script src="script.js"></script>
 </body>
 </html>
